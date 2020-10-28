@@ -22,4 +22,4 @@ io.on('connection', function (socket) {
 });
 
 //Khởi tạo 1 server listen tại 1 port
-server.listen(7778);
+server.listen(process.env.PORT || 7778);
