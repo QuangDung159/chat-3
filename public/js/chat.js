@@ -1,6 +1,6 @@
 $(function () {
     //Kết nối tới server socket đang lắng nghe
-    var socket = io.connect('http://localhost:7778');
+    var socket = io.connect('https://node-js-chat-real-time.herokuapp.com/');
 
     //Socket nhận data và append vào giao diện
     socket.on("send", function (data) {
