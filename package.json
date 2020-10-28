@@ -1,10 +1,16 @@
 {
     "name": "node_chat_realtime",
+    "scripts": {
+        "start": "nodemon app.js"
+    },
     "version": "1.0.0",
     "description": "Demo chat realtime NodeJS",
     "dependencies": {
+        "body-parser": "^1.19.0",
         "express": "^4.16.3",
         "jquery": "^3.5.1",
+        "mongoose": "^5.10.11",
+        "nodemon": "^2.0.6",
         "socket.io": "^2.1.1"
     },
     "author": "Dung Lu"
