@@ -1,13 +1,18 @@
 $(function () {
     //Kết nối tới server socket đang lắng nghe
-    var socket = io.connect('https://node-js-chat-real-time.herokuapp.com/');
-    //var socket = io.connect('http://localhost:7778/');
+    // var socket = io.connect('https://node-js-chat-real-time.herokuapp.com/');
+    var socket = io.connect('http://localhost:7778/');
 
-    //Socket nhận data và append vào giao diện
-    socket.on("send", function (data) {
-        console.log(data);
-        $("#content").append("<p class='message'>" + data.username + ": " + data.message + "</p>")
-    })
+    var token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+
+    socket.on('connect', () => authen(token,
+        () => {
+            console.log('object')
+        },
+        (msg) => {
+            console.log(`unauthorized: ${JSON.stringify(msg.data)}`);
+        }
+    ));
 
     //Bắt sự kiện click gửi message
     $("#sendMessage").on('click', function () {
@@ -20,19 +25,56 @@ $(function () {
         }
     });
 
-    var sendMessage = function () {
+    var authen = (token, successCallback, errorCallback) => {
+        socket
+            .emit('authenticate', { token }) //send the jwt
+            .on('authenticated', () => successCallback())
+            .on('unauthorized', (msg) => errorCallback(msg))
+    }
+
+    socket.on("send", function (data) {
+        authen(token,
+            () => {
+                console.log(data);
+                $("#content").append("<p class='message'>" + data.username + ": " + data.message + "</p>")
+            },
+            (msg) => {
+                console.log(`unauthorized: ${JSON.stringify(msg.data)}`);
+            })
+    })
+
+    var onSendMessage = () => {
         var username = $('#username').val();
         var content = $('#message').val();
 
         if (username == '' || content == '') {
-            alert('Please enter name and message!!');
+            console.log('Please enter name and message!!');
         } else {
             //Gửi dữ liệu cho socket
             socket.emit('send', { username: username, message: content });
             $('#message').val('');
             // saveToMongo({ username: username, message: content })
-            saveToMongo({ username: username, message: content });
         }
+    }
+
+    var sendMessage = () => {
+        authen(token,
+            () => onSendMessage(),
+            (msg) => {
+                console.log(`unauthorized: ${JSON.stringify(msg.data)}`);
+            });
+
+        // var username = $('#username').val();
+        // var content = $('#message').val();
+
+        // if (username == '' || content == '') {
+        //     alert('Please enter name and message!!');
+        // } else {
+        //     //Gửi dữ liệu cho socket
+        //     socket.emit('send', { username: username, message: content });
+        //     $('#message').val('');
+        //     // saveToMongo({ username: username, message: content })
+        // }
     }
 
     var saveToMongo = function (message) {
